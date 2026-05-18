@@ -501,13 +501,19 @@ function switchTheme(theme)
 }
 
 function preloadSaveData() {
+    //somehow the first value in this list is ignored (its like id=-1?)
+    const sIds = [0,0,0,0]
+    let elem;
     if (manager.localSaver.language)
     {
         switchLanguage(manager.localSaver.language);
     }
     else
     {
-        document.getElementById("language").selectedIndex = 0;
+        elem = document.getElementById("language");
+        elem.selectedIndex = sIds[0];
+        switchLanguage(elem.options[sIds[0]].value)
+        elem.dispatchEvent(new Event('change'));
     }
 
     if(manager.localSaver.theme)
@@ -516,16 +522,18 @@ function preloadSaveData() {
     }
     else
     {
-        document.getElementById("difficulty").selectedIndex = 0;
+        elem = document.getElementById("theme");
+        elem.selectedIndex = sIds[1];
+        switchTheme(elem.options[sIds[1]].value)
+        elem.dispatchEvent(new Event('change'));
     }
-    if(manager.localSaver.theme)
+
+    if (!manager.localSaver.difficulty)
     {
-        switchTheme(manager.localSaver.theme)
-    }
-    else
-    {
-        document.getElementById("theme").selectedIndex = 0;
-        
+        elem = document.getElementById("difficulty");
+        elem.selectedIndex = sIds[2];
+        elem.dispatchEvent(new Event('change'));
+
     }
     
     
@@ -759,11 +767,11 @@ createApp({
     return {
         timerValue,
         themes: ref(manager.themeContainer.themes),
-        curDifficulty: ref(manager.localSaver.difficulty || changeDifficulty(2)),
+        curDifficulty: ref(manager.localSaver.difficulty),
         curLanguage,
         curName,
 
-        curTheme: ref(manager.localSaver.theme || switchTheme(manager.themeContainer.themes[0].name)),
+        curTheme: ref(manager.localSaver.theme),
 
         resolvedScores,
         personalScores,
