@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- VUE is mounted to the id = "app" -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Application</title>
+
+    
+    <style>
+        /* 🎨 Custom Balanced Teal Theme using your variable names */
+        :root {
+            --bg1: #004d40;       /* Dark Teal: Main Card/Scene Backgrounds */
+            --bg2: #002d26;       /* Deepest Teal: For dropdowns and inputs */
+            --fg1: #e0f2f1;       /* Light Ice Teal: Crisp Main Text */
+            --fg2: #80cbc4;       /* Soft Mint: Muted labels and borders */
+            --tc: #26a69a;  
+            --ac: #d5ec7a;      /* Vibrant Teal: Buttons and Primary borders */
+            --cau: #ff7043;       /* Contrast Coral: Dynamic Accent/Timer/Danger */
+            --cor: #4db6ac;       /* Highlight Teal: Active / Success text states */
+            --font: Arial, Helvetica, sans-serif; /* Classic Arial Font */
+        }
+
+        /* Base Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font);
+            min-height: 100vh;
+            background-color: #001f1a; /* Base dark background */
+        }
+
+        /* Full-screen backdrop reactive to Vue's testColor dynamic updates */
+        #app {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Core Component Layout Containers */
+        #Main, #Options, #Records, #Game, #GameMain, #GameStats {
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--bg1);
+            border: 1px solid var(--fg2);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--fg1);
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--fg2);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Layout Structure Modules */
+        .scene-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--fg2);
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Interactive Inputs */
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg2);
+            border: 1px solid var(--fg2);
+            color: var(--fg1);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: var(--font);
+            outline: none;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--tc);
+        }
+
+        .input-caution {
+            border: 2px solid var(--cau) !important;
+        }
+
+        /* Buttons & Dynamic Styling Hooks */
+        button {
+            cursor: pointer;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font);
+            background-color: var(--bg2);
+            color: var(--fg1);
+            border: 1px solid var(--fg2);
+        }
+
+        button:hover {
+            background-color: var(--tc);
+            color: var(--ac);
+        }
+
+        /* Utility Color Variant Modifications */
+        .btn-primary {
+            background-color: var(--tc);
+            color: #002d26;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: var(--cor);
+            color: #002d26;
+        }
+
+        .btn-accent {
+            background-color: var(--cau);
+            color: #ffffff;
+            border: none;
+        }
+        .btn-accent:hover {
+            opacity: 0.9;
+        }
+
+        .btn-cao{
+            border: 2px solid var(--cau) !important;
+            color: var(--cau);
+        }
+
+        .btn-cor{
+            border: 2px solid var(--cor) !important;
+            color: var(--cor);
+        }
+
+        /* High-Score Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 8px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--fg2);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            color: var(--fg2);
+            text-transform: uppercase;
+            font-size: 22px;
+        }
+
+        td {
+            background-color: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(128, 203, 196, 0.2);
+            color: var(--fg1);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .hud-cau {
+            color: var(--cau);
+            margin-top: 4px;
+        }
+
+        .game-hud {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--fg2);
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .hud-cus {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--ac);
+            margin-top: 4px;
+        }
+
+        .hud-box {
+            text-align: center;
+        }
+
+        .hud-val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--cor);
+            margin-top: 4px;
+        }
+
+        #taskField {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        #taskField button {
+            background-color: var(--bg2);
+            border: 1px solid var(--fg2);
+            padding: 16px;
+            font-size: 1.2rem;
+        }
+
+        .timer-container {
+            width: 100%;
+            background-color: var(--bg2);
+            height: 10px;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 1px solid var(--fg2);
+            margin-bottom: 10px;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--tc), var(--cau));
+            transition: width 0.1s linear;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .save-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--fg2);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-separator-line {
+            display: inline-block;
+            width: 10px;                  
+            height: 20px;                 
+            opacity: 0.4;                 
+            align-self: center;                 
+}
+    </style>
+
+
+</head>
+<body id="main-body" style="background-color: var(--bg1); display: none;">
+
+    <div id="app" >
+
+        
+
+
+        <div id="Main" v-show="curScene === 'Main'">
+            <div>
+                <h1 loc = "game_name"></h1>
+            </div>
+            <div>
+                <button loc = "game" @click = "curScene = 'Game'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "options" @click = "curScene = 'Options'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "records" @click = "curScene = 'Records'"></button>
+            </div>
+        </div>
+
+
+
+        <div id="Options" v-show="curScene === 'Options'">
+            <div>
+                <h1 loc = "options"></h1>
+            </div>
+            <div>
+                <div>
+                    <label for="language" loc = "language"></label>
+                    <select id="language" v-model="curLanguage">
+                        <option value="en">English</option>
+                        <option value="est">Eesti</option>
+                        <option value="rus">Русский</option>
+                    </select>
+                </div>
+                <span class = "btn-separator-line"></span>
+                <span class = "btn-separator-line"></span>
+                <div>
+                    <label for="difficulty" loc="size"></label>
+                    <select id="difficulty" v-model="curDifficulty" @change="changeDifficulty()">
+                        <option v-for="n in 19" :key="n + 1" :value="n + 1">
+                        {{ n + 1 }}
+                        </option>
+                    </select>
+                </div>
+                <span class = "btn-separator-line"></span>
+                <span class = "btn-separator-line"></span>
+                <div>
+                    <label for="theme" loc = "theme"></label>
+                    <select id="theme" v-model="curTheme" @change="switchTheme(curTheme)">
+                        <option v-for="theme in themes" :key="theme.name" :value="theme.name">{{ theme.name }}</option>
+                    </select>
+                </div>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <button loc = "home" class="btn-primary" @click = "curScene = 'Main'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "game" class="btn-primary" @click = "curScene = 'Game'"></button>
+            </div>
+        </div>
+
+
+
+        <div id="Records" v-show="curScene === 'Records'">
+            <div>
+                <h1 loc = "records"></h1>
+            </div>
+            <div>
+                <div>
+                    <div loc="all_records" class="hud-cus"></div>
+
+                    <div v-if="isLoading" class="hud-cus">...</div>
+
+                    <div v-else-if="resolvedScores.length === 0">
+                        <table>
+                        <thead>
+                            <tr>
+                                <th>&#9819</th>
+                                <th>&#9998</th>
+                                <th>&#8721</th>
+                                <th>&#10004</th>
+                                <th>&#10006</th>
+                                <th>&#10026</th>
+                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </thead>
+                        </table>
+                    </div>
+                    
+                    <table v-else>
+                        <thead>
+                            <tr>
+                                <th>&#9819</th>
+                                <th>&#9998</th>
+                                <th>&#8721</th>
+                                <th>&#10004</th>
+                                <th>&#10006</th>
+                                <th>&#10026</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(record, index) in resolvedScores" :key="index">
+                                <td>{{ record.rank }}</td>
+                                <td>{{ record.name }}</td>
+                                <td>{{ record.difficulty }}</td>
+                                <td>{{ record.correct }}</td>
+                                <td>{{ record.incorrect }}</td>
+                                <td>{{ record.score }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <span class = "btn-separator-line"></span>
+                <div>
+                    <div loc="your_records" class="hud-cus"></div>
+
+                    <div v-if="isLoading" class="hud-cus">...</div>
+
+                    <div v-else-if="personalScores.length === 0">
+                        <table>
+                        <thead>
+                            <tr>
+                                <th>&#9819</th>
+                                <th>&#9998</th>
+                                <th>&#8721</th>
+                                <th>&#10004</th>
+                                <th>&#10006</th>
+                                <th>&#10026</th>
+                            </tr>
+                            <tbody>
+                                <tr>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </thead>
+                        </table>
+                    </div>
+                    
+                    <table v-else>
+                        <thead>
+                            <tr>
+                                <th>&#9819</th>
+                                <th>&#9998</th>
+                                <th>&#8721</th>
+                                <th>&#10004</th>
+                                <th>&#10006</th>
+                                <th>&#10026</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(record, index) in personalScores" :key="index">
+                                <td>{{ record.rank }}</td>
+                                <td>{{ record.name }}</td>
+                                <td>{{ record.difficulty }}</td>
+                                <td>{{ record.correct }}</td>
+                                <td>{{ record.incorrect }}</td>
+                                <td>{{ record.score }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <button loc = "home" class="btn-primary" @click = "curScene = 'Main'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "game" class="btn-primary" @click = "curScene = 'Game'"></button>
+            </div>
+        </div>
+
+
+
+        <div id="Game" v-show="curScene === 'Game'">
+            <div>
+                <button loc="start_game" @click="curScene = 'GameMain'"></button>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <button loc = "home" class="btn-primary" @click = "curScene = 'Main'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "options" class="btn-primary" @click = "curScene = 'Options'"></button>
+            </div>
+        </div>
+
+
+
+        <div id="GameMain" v-show="curScene === 'GameMain'">
+            <div>
+                <button loc="stop_game" @click="curScene = 'Game'"></button>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <div id="timer" class="timer-container" style="position: relative; height: 30px; width: 300px; border-radius: 5px; overflow: hidden;">
+                    <span id="timer-display" class="timer-bar" :style="{position: 'absolute', top: 0, left: 0, height: '100%', width: timerValue + '%', backgroundColor: 'coral', zIndex: 1 }"></span>
+                </div>
+                <span class = "btn-separator-line"></span>
+                <div>
+                    <div>
+                        <label for="nextTask" loc="next_task"></label>
+                        <div id="task" class="hud-cus">0 x 0</div>
+                    </div>
+                    <span class = "btn-separator-line"></span>
+                    <div>
+                        <label for="gameScore" loc="your_score"></label>
+                        <div id="gameScore" class="hud-cus">{{ curScore }}</div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div id="taskField">
+
+                </div>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <button loc = "home" class="btn-primary" @click = "curScene = 'Main'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "options" class="btn-primary" @click = "curScene = 'Options'"></button>
+            </div>
+        </div>
+
+
+
+        <div id="GameStats" v-show="curScene === 'GameStats'">
+            <div>
+                <div>
+                    <div>
+                        <label for="correctAns" loc="correct_answers"></label>
+                        <div id="correctAns" class="hud-cus">{{curQuestionsCorrect}}/{{curQuestionsCompleted}}</div>
+                    </div>
+                    <span class = "btn-separator-line"></span>
+                    <div>
+                        <label for="yourScore" loc="your_score"></label>
+                        <div id="yourScore" class="hud-cus">{{curScore}}</div>
+                    </div>
+                </div>
+                <span class = "btn-separator-line"></span>
+                <div id="saveDataScene">
+                    <div>
+                        <div id="please-enter-name" class="hud-cau" loc="enter_correct_name"></div>
+                    </div>
+                    <div>
+                        <input id="username-input" type="text" placeholder=">:[" @input="curName = $event.target.value" :value="curName"></input>
+                    </div> 
+                    <span class = "btn-separator-line"></span>
+                    <div>
+                        <button @click="checkAndSave()" loc="save_results"></button>
+                    </div> 
+                </div>
+                <div id="showRecordsScene">
+                    <button @click="curScene = 'Records'" loc="records"></button>
+                </div>
+            </div>
+            <span class = "btn-separator-line"></span>
+            <div>
+                <button loc = "home" class="btn-primary" @click = "curScene = 'Main'"></button>
+                <span class = "btn-separator-line"></span>
+                <button loc = "options" class="btn-primary" @click = "curScene = 'Options'"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src = "App.js"></script>
+        
+</body>
+</html>
