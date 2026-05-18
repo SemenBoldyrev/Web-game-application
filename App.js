@@ -1,4 +1,4 @@
-const { createApp, ref, watch, reactive } = Vue;
+const { createApp, ref, watch, reactive, onMounted } = Vue;
 
 //OOP
 class CorrectionChecker 
@@ -724,7 +724,11 @@ createApp({
     }
     loadScores();
     //
-    document.getElementById("main-body").style.display = "block";
+    onMounted(() => {
+        preloadSaveData();
+        document.getElementById("main-body").style.display = "block";
+    });
+    
     //I decided to reference all vue-used variables and functions here, so it will be easier to track
     return {
         timerValue,
@@ -757,4 +761,3 @@ createApp({
   }
 }).mount('#app');
 
-preloadSaveData();
