@@ -653,7 +653,7 @@ function startGame()
 createApp({
   setup() {
 
-    let curLanguage = ref(manager.localSaver.language || switchLanguage("en"));
+    let curLanguage = ref(manager.localSaver.language);
     watch(curLanguage, (newValue, oldValue) => {
             console.log(`Changed to: ${newValue}`);
             switchLanguage(newValue);   
