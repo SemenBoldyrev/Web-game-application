@@ -501,8 +501,34 @@ function switchTheme(theme)
 }
 
 function preloadSaveData() {
-    switchLanguage(manager.localSaver.language || "en");
-    switchTheme(manager.localSaver.theme || manager.themeContainer.themes[0].name);
+    if (manager.localSaver.language)
+    {
+        switchLanguage(manager.localSaver.language);
+    }
+    else
+    {
+        document.getElementById("language").selectedIndex = 0;
+    }
+
+    if(manager.localSaver.theme)
+    {
+        switchTheme(manager.localSaver.theme);
+    }
+    else
+    {
+        document.getElementById("difficulty").selectedIndex = 0;
+    }
+    if(manager.localSaver.theme)
+    {
+        switchTheme(manager.localSaver.theme)
+    }
+    else
+    {
+        document.getElementById("theme").selectedIndex = 0;
+        
+    }
+    
+    
 }
 
 function addPlayerScore(name, difficulty, correct, incorrect, score) 
